@@ -13,7 +13,7 @@ Deploy in <strong>30 seconds</strong> — Say goodbye to endless scrolling, only
 [![GitHub Stars](https://img.shields.io/github/stars/sansan0/TrendRadar?style=flat-square&logo=github&color=yellow)](https://github.com/sansan0/TrendRadar/stargazers)
 [![GitHub Forks](https://img.shields.io/github/forks/sansan0/TrendRadar?style=flat-square&logo=github&color=blue)](https://github.com/sansan0/TrendRadar/network/members)
 [![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg?style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/badge/version-v5.3.0-blue.svg)](https://github.com/sansan0/TrendRadar)
+[![Version](https://img.shields.io/badge/version-v5.4.0-blue.svg)](https://github.com/sansan0/TrendRadar)
 [![MCP](https://img.shields.io/badge/MCP-v3.1.7-green.svg)](https://github.com/sansan0/TrendRadar)
 [![RSS](https://img.shields.io/badge/RSS-Feed_Support-orange.svg?style=flat-square&logo=rss&logoColor=white)](https://github.com/sansan0/TrendRadar)
 [![AI Translation](https://img.shields.io/badge/AI-Multi--Language-purple.svg?style=flat-square)](https://github.com/sansan0/TrendRadar)
@@ -158,8 +158,8 @@ After communication, the author indicated no concerns about server pressure, but
 
 
 - **GitHub Issues**: Suitable for targeted answers. Please provide complete info when asking (screenshots, error logs, system environment, etc.).
-- **Official Account**: Suitable for quick consultation. Suggest priority to communicate in public comment area of related articles. If private message, please use polite language 😉
-- **Contact**: path@linux.do
+- **Official Account**: Suggested for interaction. Please prioritize public comments under relevant articles. If you need to ask questions, liking, recommending, or sharing articles to show support is highly appreciated! (´▽`ʃ♡ƪ).
+  <br>*(Friendly Reminder: This is a free open-source project, not a commercial service. Please check the documentation first if you encounter issues. Patience and courtesy are expected. I cannot respond to demands for customer support or emotional accusations. Thank you for understanding. Additionally, significant effort went into the documentation; it is strongly recommended to read the [**🚀 Quick Start**](#-quick-start) section first, where most deployment answers can be found.)*
 
 
 | Official Account | WeChat Appreciation | Alipay Appreciation |
@@ -172,6 +172,13 @@ After communication, the author indicated no concerns about server pressure, but
 
 >**📌 Check Latest Updates**: **[Original Repository Changelog](https://github.com/sansan0/TrendRadar?tab=readme-ov-file#-changelog)**:
 - **Tip**: Check [Changelog] to understand specific [Features]
+
+### 2026/01/23 - v5.4.0
+
+- Added independent control for AI analysis mode, options: follow_report | daily | current | incremental
+- Added time window control for AI analysis, supporting custom execution periods and daily frequency limits
+- Added configuration file version management function
+- Fixed several bugs
 
 ### 2026/01/19 - v5.3.0
 
@@ -3260,10 +3267,6 @@ The simplest way is via environment variables (Recommended for GitHub Secrets or
 | **DeepSeek** (Recommended) | `deepseek/deepseek-chat` | Excellent cost-performance ratio for high-frequency analysis |
 | **OpenAI** | `openai/gpt-4o`<br>`openai/gpt-4o-mini` | GPT-4o series |
 | **Google Gemini** | `gemini/gemini-1.5-flash`<br>`gemini/gemini-1.5-pro` | Gemini series |
-| **Claude** | `anthropic/claude-3-5-sonnet-20241022` | Anthropic Claude series |
-| **Zhipu AI** | `zhipu/glm-4-plus`<br>`zhipu/glm-4-flash` | Chinese model with native Chinese support |
-| **Moonshot** | `moonshot/moonshot-v1-8k`<br>`moonshot/moonshot-v1-32k` | Kimi series |
-| **Qwen** | `qwen/qwen-plus`<br>`qwen/qwen-turbo` | Alibaba Cloud Tongyi Qianwen |
 | **Custom API** | Any format | Use with `AI_API_BASE` |
 
 > 💡 **New Feature**: Now based on [LiteLLM](https://github.com/BerriAI/litellm) unified interface, supporting 100+ AI providers with simpler configuration and better error handling.
