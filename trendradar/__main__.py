@@ -829,6 +829,12 @@ class NewsAnalyzer:
                 timezone=timezone,
                 freshness_enabled=freshness_enabled,
                 default_max_age_days=default_max_age_days,
+                rsshub_base=rss_config.get("RSSHUB_BASE", "https://rsshub.app/"),
+                rsshub_mirrors=[
+                    "https://feedx.xyz/",
+                    "https://rsshub.12306.workers.dev/",
+                    "https://rsshub.pseudoyu.com/",
+                ],
             )
 
             # 抓取数据
