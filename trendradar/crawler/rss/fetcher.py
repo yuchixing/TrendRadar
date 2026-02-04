@@ -42,6 +42,8 @@ class RSSFetcher:
         timezone: str = DEFAULT_TIMEZONE,
         freshness_enabled: bool = True,
         default_max_age_days: int = 3,
+        rsshub_base: str = "https://rsshub.app/",
+        rsshub_mirrors: List[str] = None,
     ):
         """
         初始化抓取器
@@ -55,6 +57,8 @@ class RSSFetcher:
             timezone: 时区配置（如 'Asia/Shanghai'）
             freshness_enabled: 是否启用新鲜度过滤
             default_max_age_days: 默认最大文章年龄（天）
+            rsshub_base: RSSHub 服务器基础 URL（用于处理 rsshub:// 协议）
+            rsshub_mirrors: RSSHub 备用镜像列表
         """
         self.feeds = [f for f in feeds if f.enabled]
         self.request_interval = request_interval
@@ -64,6 +68,13 @@ class RSSFetcher:
         self.timezone = timezone
         self.freshness_enabled = freshness_enabled
         self.default_max_age_days = default_max_age_days
+        
+        # 初始化 RSSHub 镜像列表
+        self.rsshub_mirrors = rsshub_mirrors or []
+        # 确保主镜像在列表中且在第一位
+        self.rsshub_mirrors = [rsshub_base] + [m for m in self.rsshub_mirrors if m != rsshub_base]
+        # 确保所有镜像 URL 末尾有斜杠
+        self.rsshub_mirrors = [m.rstrip('/') + '/' for m in self.rsshub_mirrors]
 
         self.parser = RSSParser()
         self.session = self._create_session()
@@ -138,10 +149,35 @@ class RSSFetcher:
             (条目列表, 错误信息) 元组
         """
         try:
-            response = self.session.get(feed.url, timeout=self.timeout)
-            response.raise_for_status()
-
-            parsed_items = self.parser.parse(response.text, feed.url)
+            # 处理 rsshub:// 协议
+            feed_url = feed.url
+            is_rsshub_url = feed_url.startswith('rsshub://')
+            rsshub_path = feed_url[9:] if is_rsshub_url else ''
+            
+            # 如果是 rsshub:// 协议，尝试所有可用的镜像
+            if is_rsshub_url:
+                errors = []
+                for mirror in self.rsshub_mirrors:
+                    try:
+                        current_url = mirror + rsshub_path
+                        response = self.session.get(current_url, timeout=self.timeout)
+                        response.raise_for_status()
+                        
+                        # 如果成功，处理响应
+                        parsed_items = self.parser.parse(response.text, feed.url)
+                        break
+                    except requests.RequestException as e:
+                        errors.append(f"{mirror}: {e}")
+                else:
+                    # 所有镜像都尝试失败
+                    error = f"所有 RSSHub 镜像请求失败: {'; '.join(errors)}"
+                    print(f"[RSS] {feed.name}: {error}")
+                    return [], error
+            else:
+                # 普通 URL，直接请求
+                response = self.session.get(feed_url, timeout=self.timeout)
+                response.raise_for_status()
+                parsed_items = self.parser.parse(response.text, feed.url)
 
             # 限制条目数量（0=不限制）
             if feed.max_items > 0:
@@ -293,6 +329,19 @@ class RSSFetcher:
             if feed.id and feed.url:
                 feeds.append(feed)
 
+        # 读取 RSSHub 配置
+        rsshub_base = config.get("rsshub_base", "https://rsshub.app/")
+        # 验证 rsshub_base 是有效的 URL 格式
+        if not (rsshub_base.startswith("http://") or rsshub_base.startswith("https://")):
+            raise ValueError(f"Invalid rsshub_base URL: {rsshub_base}. Must start with http:// or https://")
+        
+        # 读取 RSSHub 备用镜像列表
+        rsshub_mirrors = config.get("rsshub_mirrors", [])
+        # 验证所有镜像 URL 格式
+        for mirror in rsshub_mirrors:
+            if not (mirror.startswith("http://") or mirror.startswith("https://")):
+                raise ValueError(f"Invalid rsshub_mirror URL: {mirror}. Must start with http:// or https://")
+
         return cls(
             feeds=feeds,
             request_interval=config.get("request_interval", 2000),
@@ -302,4 +351,6 @@ class RSSFetcher:
             timezone=config.get("timezone", DEFAULT_TIMEZONE),
             freshness_enabled=freshness_enabled,
             default_max_age_days=default_max_age_days,
+            rsshub_base=rsshub_base,
+            rsshub_mirrors=rsshub_mirrors,
         )

@@ -62,6 +62,10 @@ class RSSParser:
         if self._is_json_feed(content):
             return self._parse_json_feed(content, feed_url)
 
+        # 尝试检测 Reportify 自定义 JSON
+        if self._is_reportify_json(content):
+            return self._parse_reportify_json(content, feed_url)
+
         # 使用 feedparser 解析 RSS/Atom
         feed = feedparser.parse(content)
 
@@ -90,6 +94,22 @@ class RSSParser:
             data = json.loads(content)
             version = data.get("version", "")
             return "jsonfeed.org" in version
+        except (json.JSONDecodeError, TypeError):
+            return False
+
+    def _is_reportify_json(self, content: str) -> bool:
+        """
+        检测内容是否为 Reportify 自定义 JSON 格式
+
+        Reportify JSON 包含 items 数组
+        """
+        content = content.strip()
+        if not content.startswith("{"):
+            return False
+
+        try:
+            data = json.loads(content)
+            return "items" in data and isinstance(data["items"], list)
         except (json.JSONDecodeError, TypeError):
             return False
 
@@ -122,6 +142,89 @@ class RSSParser:
                 items.append(item)
 
         return items
+
+    def _parse_reportify_json(self, content: str, feed_url: str = "") -> List[ParsedRSSItem]:
+        """
+        解析 Reportify 自定义 JSON 格式
+
+        Args:
+            content: Reportify JSON 内容
+            feed_url: Feed URL（用于错误提示）
+
+        Returns:
+            解析后的条目列表
+        """
+        try:
+            data = json.loads(content)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Reportify JSON 解析失败 ({feed_url}): {e}")
+
+        items_data = data.get("items", [])
+        if not items_data:
+            return []
+
+        items = []
+        for item_data in items_data:
+            item = self._parse_reportify_item(item_data)
+            if item:
+                items.append(item)
+
+        return items
+
+    def _parse_reportify_item(self, item_data: Dict[str, Any]) -> Optional[ParsedRSSItem]:
+        """解析单个 Reportify JSON 条目"""
+        # 处理嵌套的 report 字段
+        report_data = item_data.get("report", item_data)
+        
+        # 标题：使用 report_title
+        title = report_data.get("report_title", "")
+        title = self._clean_text(title)
+        if not title:
+            return None
+
+        # URL：使用 url 或构建链接
+        url = report_data.get("url", "")
+        if not url:
+            # Try to build URL from report_id
+            report_id = report_data.get("report_id")
+            if report_id:
+                url = f"https://reportify.cn/news/{report_id}"
+
+        # 发布时间：使用 publish_at（毫秒时间戳）
+        published_at = None
+        publish_at = report_data.get("publish_at")
+        if publish_at:
+            try:
+                # Convert milliseconds to seconds
+                if isinstance(publish_at, (int, float)):
+                    dt = datetime.fromtimestamp(publish_at / 1000)
+                    published_at = dt.isoformat()
+            except (ValueError, TypeError):
+                pass
+
+        # 摘要：使用 summary
+        summary = report_data.get("summary", "")
+        if summary:
+            summary = self._clean_text(summary)
+            if len(summary) > self.max_summary_length:
+                summary = summary[:self.max_summary_length] + "..."
+
+        # 作者：使用 report_source
+        author = report_data.get("report_source", "")
+        if author:
+            author = self._clean_text(author)
+
+        # GUID：使用 report_id 或 URL
+        guid = report_data.get("report_id", "") or url
+
+        return ParsedRSSItem(
+            title=title,
+            url=url,
+            published_at=published_at,
+            summary=summary or None,
+            author=author or None,
+            guid=guid,
+        )
 
     def _parse_json_feed_item(self, item_data: Dict[str, Any]) -> Optional[ParsedRSSItem]:
         """解析单个 JSON Feed 条目"""

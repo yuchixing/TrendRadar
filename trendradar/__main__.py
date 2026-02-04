@@ -1729,14 +1729,14 @@ def main():
             config["_FORCE_AI"] = True
             print("[CLI] 已启用强制 AI 分析模式，将忽略 once_per_day 限制")
 
-        version_url = config.get("VERSION_CHECK_URL", "")
-        configs_version_url = config.get("CONFIGS_VERSION_CHECK_URL", "")
+        # version_url = config.get("VERSION_CHECK_URL", "")
+        # configs_version_url = config.get("CONFIGS_VERSION_CHECK_URL", "")
 
-        # 统一版本检查（程序版本 + 配置文件版本，只请求一次远程）
-        need_update = False
-        remote_version = None
-        if version_url:
-            need_update, remote_version = check_all_versions(version_url, configs_version_url)
+        # # 统一版本检查（程序版本 + 配置文件版本，只请求一次远程）
+        # need_update = False
+        # remote_version = None
+        # if version_url:
+        #     need_update, remote_version = check_all_versions(version_url, configs_version_url)
 
         # 复用已加载的配置，避免重复加载
         analyzer = NewsAnalyzer(config=config)

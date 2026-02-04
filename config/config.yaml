@@ -44,16 +44,14 @@ platforms:
     #   name: "bilibili 热搜"
     - id: "cls-hot"
       name: "财联社热门"
-    # - id: "ifeng"
-    #   name: "凤凰网"
-    # - id: "tieba"
-    #   name: "贴吧"
-    # - id: "weibo"
-    #   name: "微博"
-    # - id: "douyin"
-    #   name: "抖音"
-    # - id: "zhihu"
-    #   name: "知乎"
+    - id: "mktnews-flash"
+      name: "mktnews"
+    - id: "xueqiu-hotstock"
+      name: "雪球热门股票"
+    - id: "jin10"
+      name: "金十数据"
+    - id: "fastbull-news"
+      name: "法布财经"
 
 
 
@@ -94,11 +92,22 @@ rss:
       name: "格隆汇"
       url: "rsshub://gelonghui/hot-article/day"
 
+    - id: "reportify-report"
+      name: "Reportify 公告"
+      url: "https://api.reportify.cn/reports?page_num=1&page_size=100&channel_id=&report_types=14%2C15%2C17&query=&filling_types=&rt=1770128471370"
+    - id: "reportify-transcripts"
+      name: "Reportify 纪要"
+      url: "https://api.reportify.cn/reports?page_num=1&page_size=100&channel_id=&report_types=2%2C4%2C3%2C18%2C13&query=&rt=1770128561665"
+
+
+    - id: "reportify-research"
+      name: "Reportify 研报"
+      url: "https://api.reportify.cn/reports?page_num=1&page_size=100&channel_id=&report_types=7%2C8%2C9%2C10%2C11%2C16%2C19%2C20%2C21%2C22%2C23%2C24%2C25&query=&rt=1770128406466"
 
     # - id: "hacker-news"
     #   name: "Hacker News"
     #   url: "https://hnrss.org/frontpage"
-    #   # max_age_days: 1               # 示例：只推送1天内的文章
+    #   # max_age_da ys: 1               # 示例：只推送1天内的文章
 
     # - id: "ruanyifeng"
     #   name: "阮一峰的网络日志"
@@ -137,7 +146,7 @@ rss:
 #    • 适用场景：避免重复信息干扰
 # ===============================================================
 report:
-  mode: "current"                     # 可选: daily | current | incremental
+  mode: "daily"                     # 可选: daily | current | incremental
   display_mode: "keyword"             # 分组维度: keyword | platform
                                       # keyword: 按关键词分组显示（默认）
                                       # platform: 按平台/来源分组显示
@@ -325,7 +334,7 @@ storage:
   # 数据拉取配置（从远程同步到本地）
   # 用于 MCP Server 等场景：爬虫存到远程，MCP 拉取到本地分析
   pull:
-    enabled: false                    # 是否启用启动时自动拉取
+    enabled: true                    # 是否启用启动时自动拉取
     days: 7                           # 拉取最近 N 天的数据
 
 
